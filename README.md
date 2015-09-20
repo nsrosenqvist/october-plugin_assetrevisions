@@ -19,7 +19,3 @@ to save the manifest file as "rev-manifest.json" in your theme root.
 If the filter doesn't find a corresponding entry in the manifest it simply
 returns what the standard ["theme" filter](http://octobercms.com/docs/markup/filter-theme)
 would have returned.
-
-## Attribution
-
-The plugin icon is made by Stanislav Levin and released under CC 3.0
