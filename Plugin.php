@@ -8,11 +8,15 @@ use NSRosenqvist\AssetRevisions\Components\AssetRevisions as Component;
 
 class Plugin extends \System\Classes\PluginBase
 {
+    protected static $loaded = false;
+    protected static $lookup = [];
+    protected static $theme = null;
+
     public function pluginDetails()
     {
         return [
             'name' => 'Asset Revisions',
-            'description' => 'Reads the rev-manifest.json files and provide the asset file names through a twig filter',
+            'description' => 'Provides a filter to make the theme\'s asset revision manifest file available in a twig filter.',
             'author' => 'Niklas Rosenqvist',
             'icon' => 'icon-leaf',
             'homepage' => 'https://www.nsrosenqvist.com/'
@@ -28,32 +32,46 @@ class Plugin extends \System\Classes\PluginBase
         ];
     }
 
+    public function boot()
+    {
+        if ( ! self::$loaded)
+            $this->loadLookup();
+    }
+
     public function getRevision($text)
     {
-        $theme = Theme::getActiveTheme();
-        $themeDir = ltrim(Config::get('cms.themesPath'),'/').'/'.$theme->getDirName();
+        if (isset(self::$lookup[$text]))
+        {
+            return Request::root().'/'.$this->getThemeDir().'/'.self::$lookup[$text];
+        }
+
+        return Request::root().'/'.$this->getThemeDir().'/'.$text;
+    }
+
+    protected function loadLookup()
+    {
         $fileName = 'rev-manifest.json';
-        $manifestFile = $themeDir.'/'.$fileName;
+        $manifestFile = $this->getThemeDir().'/'.$fileName;
 
         if (File::exists($manifestFile))
         {
-            $manifest = $this->loadRevisionManifest($manifestFile);
-
-            foreach ($manifest as $asset => $path)
-            {
-                if ($text == $asset)
-                {
-                    return Request::root().'/'.$themeDir.'/'.$path;
-                }
-            }
+            self::$lookup = $this->loadRevisionManifest($manifestFile);
         }
 
-        return Request::root().'/'.$themeDir.'/'.$text;
+        self::$loaded = true;
     }
 
-    private function loadRevisionManifest($path)
+    protected function loadRevisionManifest($path)
     {
         $manifest = File::get($path);
         return json_decode($manifest, true);
+    }
+
+    protected function getThemeDir()
+    {
+        if (is_null(self::$theme))
+            self::$theme = Theme::getActiveTheme();
+
+        return ltrim(Config::get('cms.themesPath'),'/').'/'.self::$theme->getDirName();
     }
 }
