@@ -1,12 +1,25 @@
-This is a simple plugin that adds a twig filter for theme developers.
+Assets loaded from a web server are usually cached. This can cause an issue when
+a file is updated, but the browser cache prevents the user from seeing the changes.
+The way to solve this but still enable caching, which greatly increases site performance,
+is to append a hash to the end of an asset's file name. So that `app.css` becomes
+'app-jid09j1230123.css', and that hash updates every time the file does.
 
-By enabling this plugin a filter called `revision` becomes available and it reads
-the `rev-manifest.json` in the theme root. Then in the theme when you link to
-assets, instead of using the `theme` filter you can use the `revision` filter.
+There are tools like [gulp-rev](https://www.npmjs.com/package/gulp-rev) that does
+this automatically when building the project and outputs a manifest file to track
+the changes. This plugin reads that manifest file and returns the correct file
+revision. So that assets can still be worked with easily:
+
+```twig
+{{ "assets/css/app.css"|revision }} ... returns "assets/css/app-jid09j1230123.css"
+```
+
+For now the name of the manifest file can't be configured so adjust your build system
+to save the manifest file as "rev-manifest.json" in your theme root.
 
 If the filter doesn't find a corresponding entry in the manifest it simply
-returns what `theme` would have returned.
+returns what the standard ["theme" filter](http://octobercms.com/docs/markup/filter-theme)
+would have returned.
 
-Currently the manifest path isn't configurable. If you know of a way to enable
-configuration, without forcing the user to include a component, please send a
-pull request with the necessary changes.
+## Attribution
+
+The plugin icon is made by Stanislav Levin and released under CC 3.0
