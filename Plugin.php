@@ -1,6 +1,7 @@
 <?php namespace NSRosenqvist\AssetRevisions;
 
 use Cms\Classes\Theme;
+use Cms\Classes\Controller;
 use File;
 use Config;
 use Request;
@@ -42,10 +43,9 @@ class Plugin extends \System\Classes\PluginBase
     {
         if (isset(self::$lookup[$text]))
         {
-            return Request::root().'/'.$this->getThemeDir().'/'.self::$lookup[$text];
+            return Controller::getController()->themeUrl(self::$lookup[$text]);
         }
-
-        return Request::root().'/'.$this->getThemeDir().'/'.$text;
+        return Controller::getController()->themeUrl($text);
     }
 
     protected function loadLookup()
@@ -72,6 +72,6 @@ class Plugin extends \System\Classes\PluginBase
         if (is_null(self::$theme))
             self::$theme = Theme::getActiveTheme();
 
-        return ltrim(Config::get('cms.themesPath'),'/').'/'.self::$theme->getDirName();
+        return base_path().ltrim(Config::get('cms.themesPath'),'/').'/'.self::$theme->getDirName();
     }
 }
